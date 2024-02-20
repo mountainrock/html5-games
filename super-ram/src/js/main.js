@@ -7,7 +7,8 @@ const spriteImages = {
   spriteStandLeft: "images/spriteStandLeft.png",
   spriteRunRight: "images/spriteRunRight.png",
   spriteRunLeft: "images/spriteRunLeft.png",
-  spritePlatform:"images/platform.png"
+  spritePlatform:"images/platform.png",
+  background:"images/background.png"
 };
 
 // Set up the player character
@@ -22,7 +23,7 @@ const player = {
     },
     running: {
       cropWidth: 340,
-      numberOfFrames: 30
+      numberOfFrames: 29
   },
   x: 50,
   y: canvas.height - 150,
@@ -44,13 +45,16 @@ player.image.src = spriteImages.spriteStandRight;
 
 const platform = {
   x: 200, // X position of the platform
-  y: canvas.height - 350, // Y position of the platform
+  y: canvas.height - 200, // Y position of the platform
   width: 300, // Width of the platform
   height: 60, // Height of the platform
   image: new Image(),
 };
 
 platform.image.src = spriteImages.spritePlatform;
+
+const backgroundImage = new Image();
+backgroundImage.src = spriteImages.background;
 
 // Set up the game loop
 function gameLoop() {
@@ -60,6 +64,13 @@ function gameLoop() {
     // Update the player position
     player.x += player.dx;
     player.y += player.dy;
+
+    // Update the platform position based on the player's movement
+    platform.x -= player.dx;
+
+ // Draw the parallax background
+    const backgroundX = -player.x * 0.2; // Adjust the parallax speed as needed
+    context.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
 
     preventPlayerCanvasMovingOut();
 

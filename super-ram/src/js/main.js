@@ -50,14 +50,9 @@ function gameLoop() {
     player.x += player.dx;
     player.y += player.dy;
 
-    // Prevent the player from going out of the canvas vertically
-    if (player.y + player.height > canvas.height) {
-      player.y = canvas.height - player.destHeight;
-      player.isJumping = false;
-      player.dy = 0; // Reset the vertical velocity when landing
-    }
-    // Update the player sprite animation
+    preventPlayerCanvasMovingOut();
 
+    // Update the player sprite animation
     player.tickCount++;
     if (player.tickCount > player.ticksPerFrame) {
         player.tickCount = 0;
@@ -70,12 +65,23 @@ function gameLoop() {
         }
     }
 
-    // Draw the player character
-    player.width = player.dx !== 0  ?  player.running.cropWidth : player.standing.cropWidth;
+
     // Apply gravity to the player's vertical movement
     if (player.isJumping) {
-        player.dy += player.gravity;
+      player.dy += player.gravity;
+      player.y += player.dy;
+
+      // Check if the player has landed
+      if (player.y + player.destHeight > canvas.height) {
+        player.y = canvas.height - player.destHeight;
+        player.isJumping = false;
+        player.dy = 0; // Reset the vertical velocity when landing
+      }
+
     }
+    // Draw the player character
+    player.width = player.dx !== 0  ?  player.running.cropWidth : player.standing.cropWidth;
+
 
     console.log(player.width)
     //Debug : Draw the player character bounding box for debugging
@@ -98,6 +104,26 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+function preventPlayerCanvasMovingOut(){
+    // Prevent the player from going out of the canvas vertically
+    if (player.y < 0) {
+      player.y = 0;
+      player.dy = 0;
+    }else if (player.y + player.destHeight > canvas.height) {
+         player.y = canvas.height - player.destHeight;
+         player.dy = 0;
+    }
+
+    // Prevent the player from going out of the canvas horizontally
+    if (player.x < 0) {
+      player.x = 0;
+      player.dx = 0;
+    } else if (player.x + player.destWidth > canvas.width) {
+      player.x = canvas.width - player.destWidth;
+      player.dx = 0;
+    }
+}
+
 // Handle keyboard input
 function handleKeyDown(event) {
   if (event.key === "ArrowLeft") {
@@ -111,7 +137,7 @@ function handleKeyDown(event) {
     player.isJumping = true;
     player.dy = -player.jumpSpeed;
   }  else if (event.key === "ArrowDown") {
-    player.dy = 0;
+    player.dy = player.speed;
   }
 }
 

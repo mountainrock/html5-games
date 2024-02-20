@@ -2,14 +2,27 @@
 const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext("2d");
 
+const spriteImages = {
+  spriteStandRight: "images/spriteStandRight.png",
+  spriteStandLeft: "images/spriteStandLeft.png",
+  spriteRunRight: "images/spriteRunRight.png",
+  spriteRunLeft: "images/spriteRunLeft.png"
+};
+
 // Set up the player character
 const player = {
   width: 66,
-  widthStand: 177,
-  widthRun: 340,
   height: 400,
   destWidth: 60,
   destHeight: 150,
+  standing: {
+      cropWidth: 177,
+      numberOfFrames: 60
+    },
+    running: {
+      cropWidth: 340,
+      numberOfFrames: 30
+  },
   x: 50,
   y: canvas.height - 150,
   speed: 8,
@@ -20,15 +33,13 @@ const player = {
   tickCount: 0,
   ticksPerFrame: 1,
   numberOfFrames: 0,
-  numberOfFramesRun: 30,
-  numberOfFramesStand: 60,
   isJumping: false,
   jumpHeight: 10,
   jumpSpeed: 10,
   gravity: 0.4
 };
 // Load the player image
-player.image.src ="images/spriteStandRight.png"
+player.image.src = spriteImages.spriteStandRight;
 
 // Set up the game loop
 function gameLoop() {
@@ -50,7 +61,7 @@ function gameLoop() {
       player.tickCount++;
       if (player.tickCount > player.ticksPerFrame) {
         player.tickCount = 0;
-        player.numberOfFrames = player.dx !== 0  ? player.numberOfFramesRun : player.numberOfFramesStand;
+        player.numberOfFrames = player.dx !== 0  ? player.running.numberOfFrames : player.standing.numberOfFrames;
 
         if (player.frameIndex < player.numberOfFrames - 1) {
           player.frameIndex++;
@@ -60,7 +71,7 @@ function gameLoop() {
       }
 
   // Draw the player character
-  player.width = (player.dx !== 0  ? player.widthRun : player.widthStand)
+  player.width = player.dx !== 0  ?  player.running.cropWidth : player.standing.cropWidth;
   // Apply gravity to the player's vertical movement
   if (player.isJumping) {
      player.dy += player.gravity;
@@ -91,10 +102,10 @@ function gameLoop() {
 function handleKeyDown(event) {
   if (event.key === "ArrowLeft") {
     player.dx = -player.speed;
-    player.image.src = player.dx === 0 ? "images/spriteStandLeft.png" : "images/spriteRunLeft.png";
+    player.image.src = player.dx === 0 ? spriteImages.spriteStandLeft : spriteImages.spriteRunLeft;
   } else if (event.key === "ArrowRight") {
     player.dx = player.speed;
-    player.image.src = player.dx === 0 ? "images/spriteStandRight.png" : "images/spriteRunRight.png";
+    player.image.src = player.dx === 0 ? spriteImages.spriteStandRight : spriteImages.spriteRunRight;
 
   } else if (event.key === "ArrowUp" && !player.isJumping) {
     player.isJumping = true;
@@ -106,19 +117,19 @@ function handleKeyDown(event) {
 
 function handleKeyUp(event) {
   if (event.key === "ArrowLeft") {
-    player.dx = 0;
-    player.image.src = "images/spriteStandLeft.png";
+        player.dx = 0;
+        player.image.src = spriteImages.spriteStandLeft;
   } else if (event.key === "ArrowRight") {
-    player.dx = 0;
-    player.image.src = "images/spriteStandRight.png";
+        player.dx = 0;
+        player.image.src = spriteImages.spriteStandRight;
   } else if (event.key === "ArrowUp") {
        if (player.isJumping) {
-            player.isJumping = false;
-            player.dy = +player.gravity; // Apply gravity to bring the player down
+          player.isJumping = false;
+          player.dy = +player.gravity; // Apply gravity to bring the player down
        }else {
-               console.log("up pressed " + player.y)
-              player.isJumping = true;
-              player.dy = -player.jumpSpeed; // Set the vertical velocity for jumping
+          console.log("up pressed " + player.y)
+          player.isJumping = true;
+          player.dy = -player.jumpSpeed; // Set the vertical velocity for jumping
        }
     }
 }

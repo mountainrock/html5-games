@@ -43,12 +43,12 @@ player.image.src = spriteImages.spriteStandRight;
 
 // Set up the game loop
 function gameLoop() {
-  // Clear the canvas
-  context.clearRect(0, 0, canvas.width, canvas.height);
+    // Clear the canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Update the player position
-  player.x += player.dx;
-  player.y += player.dy;
+    // Update the player position
+    player.x += player.dx;
+    player.y += player.dy;
 
     // Prevent the player from going out of the canvas vertically
     if (player.y + player.height > canvas.height) {
@@ -56,10 +56,10 @@ function gameLoop() {
       player.isJumping = false;
       player.dy = 0; // Reset the vertical velocity when landing
     }
-  // Update the player sprite animation
+    // Update the player sprite animation
 
-      player.tickCount++;
-      if (player.tickCount > player.ticksPerFrame) {
+    player.tickCount++;
+    if (player.tickCount > player.ticksPerFrame) {
         player.tickCount = 0;
         player.numberOfFrames = player.dx !== 0  ? player.running.numberOfFrames : player.standing.numberOfFrames;
 
@@ -68,34 +68,34 @@ function gameLoop() {
         } else {
           player.frameIndex = 0;
         }
-      }
+    }
 
-  // Draw the player character
-  player.width = player.dx !== 0  ?  player.running.cropWidth : player.standing.cropWidth;
-  // Apply gravity to the player's vertical movement
-  if (player.isJumping) {
-     player.dy += player.gravity;
-  }
+    // Draw the player character
+    player.width = player.dx !== 0  ?  player.running.cropWidth : player.standing.cropWidth;
+    // Apply gravity to the player's vertical movement
+    if (player.isJumping) {
+        player.dy += player.gravity;
+    }
 
-  console.log(player.width)
-  //Debug : Draw the player character bounding box for debugging
-  //context.fillStyle = "lightblue";
-  //context.fillRect(player.x, player.y, player.destWidth, player.destHeight);
+    console.log(player.width)
+    //Debug : Draw the player character bounding box for debugging
+    //context.fillStyle = "lightblue";
+    //context.fillRect(player.x, player.y, player.destWidth, player.destHeight);
 
-  //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-  context.drawImage(
-    player.image,
-    player.frameIndex * player.width,
-    0,
-    player.width,
-    player.height,
-    player.x,
-    player.y,
-    player.destWidth,
-    player.destHeight
-  );
-  // Request the next frame
-  requestAnimationFrame(gameLoop);
+    //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+    context.drawImage(
+        player.image,
+        player.frameIndex * player.width,
+        0,
+        player.width,
+        player.height,
+        player.x,
+        player.y,
+        player.destWidth,
+        player.destHeight
+    );
+    // Request the next frame
+    requestAnimationFrame(gameLoop);
 }
 
 // Handle keyboard input

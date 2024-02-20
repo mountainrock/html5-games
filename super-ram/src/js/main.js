@@ -6,7 +6,8 @@ const spriteImages = {
   spriteStandRight: "images/spriteStandRight.png",
   spriteStandLeft: "images/spriteStandLeft.png",
   spriteRunRight: "images/spriteRunRight.png",
-  spriteRunLeft: "images/spriteRunLeft.png"
+  spriteRunLeft: "images/spriteRunLeft.png",
+  spritePlatform:"images/platform.png"
 };
 
 // Set up the player character
@@ -40,6 +41,16 @@ const player = {
 };
 // Load the player image
 player.image.src = spriteImages.spriteStandRight;
+
+const platform = {
+  x: 200, // X position of the platform
+  y: canvas.height - 350, // Y position of the platform
+  width: 300, // Width of the platform
+  height: 60, // Height of the platform
+  image: new Image(),
+};
+
+platform.image.src = spriteImages.spritePlatform;
 
 // Set up the game loop
 function gameLoop() {
@@ -88,18 +99,19 @@ function gameLoop() {
     //context.fillStyle = "lightblue";
     //context.fillRect(player.x, player.y, player.destWidth, player.destHeight);
 
+
     //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
     context.drawImage(
         player.image,
-        player.frameIndex * player.width,
-        0,
-        player.width,
-        player.height,
-        player.x,
-        player.y,
-        player.destWidth,
-        player.destHeight
+        player.frameIndex * player.width,0,
+        player.width, player.height,
+        player.x, player.y,
+        player.destWidth, player.destHeight
     );
+
+    // Draw the platform
+    context.drawImage(platform.image, platform.x, platform.y, platform.width, platform.height);
+
     // Request the next frame
     requestAnimationFrame(gameLoop);
 }
@@ -122,7 +134,34 @@ function preventPlayerCanvasMovingOut(){
       player.x = canvas.width - player.destWidth;
       player.dx = 0;
     }
+
+    // Apply gravity to the player's vertical movement
+      if (player.isJumping) {
+        player.dy += player.gravity;
+        player.y += player.dy;
+
+        // Check if the player has landed on the platform
+        if (isPlayerOnPlatform()) {
+          player.y = platform.y - player.destHeight;
+          player.isJumping = false;
+          player.dy = 0; // Reset the vertical velocity when landing
+        } else if (player.y + player.destHeight > canvas.height) {
+          player.y = canvas.height - player.destHeight;
+          player.isJumping = false;
+          player.dy = 0; // Reset the vertical velocity when landing
+        }
+      }
 }
+
+// Function to check if the player is on the platform
+function isPlayerOnPlatform() {
+  return (
+    player.y + player.destHeight >= platform.y &&
+    player.y + player.destHeight <= platform.y + player.dy &&
+    player.x + player.destWidth >= platform.x &&
+    player.x <= platform.x + platform.width
+    );
+  }
 
 // Handle keyboard input
 function handleKeyDown(event) {

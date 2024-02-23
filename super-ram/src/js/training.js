@@ -15,7 +15,8 @@ const spriteImages = {
   playerRunLeft: "images/spriteRunLeft.png",
   platformBig:"images/platform.png",
   platformSmall:"images/platformSmallTall.png",
-  background:"images/background.png"
+  background:"images/background.png",
+  backgroundBig:"images/backgroundBig.jpeg"
 };
 
 const keys ={
@@ -28,6 +29,20 @@ const keys ={
 class Platform{
     constructor(x1, y1, width1, height1, spriteImage){
         this.position ={ x:x1, y:canvas.height - y1}
+        this.width = width1
+        this.height= height1
+        this.image= new Image()
+        this.image.src = spriteImage
+    }
+
+    draw(){
+          c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+    }
+}
+
+class Background{
+    constructor(x1, y1, width1, height1, spriteImage){
+        this.position ={ x:x1, y: y1}
         this.width = width1
         this.height= height1
         this.image= new Image()
@@ -127,8 +142,11 @@ function animate(){
         player.velocity.y =  10
 
     player.action = player.velocity.x !==0 ? "running" : "standing"
+    backgrounds.forEach(background => {
+        background.draw();
+    });
 
-   platforms.forEach(platform => {
+    platforms.forEach(platform => {
         //check if player is on platform
         if(player.position.y + player.height <= platform.position.y
            && player.position.y + player.height +player.velocity.y >= platform.position.y
@@ -138,6 +156,16 @@ function animate(){
        }
        platform.draw();
      });
+
+     //prevent player from going out of canvas
+     if(player.position.x < 0 || player.position.x > canvas.width-player.width){
+        player.velocity.x=0
+        if( player.position.x > canvas.width-player.width)
+            player.position.x= canvas.width-player.width
+        if(player.position.x < 0)
+            player.position.x =  0
+     }
+
     player.update()
 }
 
@@ -149,6 +177,9 @@ const platforms = [
                     new Platform(1020, 100, 150, 100, spriteImages.platformSmall)
                  ]
 
+const backgrounds =[
+                        new Background(0,0,canvas.width-10,canvas.height-10, spriteImages.backgroundBig)
+                   ]
 animate();
 
 window.addEventListener('keydown', ({key}) =>{

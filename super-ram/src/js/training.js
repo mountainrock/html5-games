@@ -18,35 +18,75 @@ const spriteImages = {
   background:"images/background.png"
 };
 
+const keys ={
+    left:{pressed:false},
+    right:{pressed:false},
+    up:{pressed:false, jumping : false},
+
+}
+
+class Platform{
+    constructor(x1, y1, width1, height1, spriteImage){
+        this.position ={ x:x1, y:canvas.height - y1}
+        this.width = width1
+        this.height= height1
+        this.image= new Image()
+        this.image.src = spriteImage
+    }
+
+    draw(){
+          c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+    }
+}
+
+
 class Player{
     constructor(){
-        this.width=66
-        this.height=400
-
-        this.frameIndex =1
+        this.frameIndex =0
         this.standing= { cropWidth: 177, cropHeight:400, destWidth: 60,  destHeight:150, numberOfFrames: 60 }
-        this.running= { cropWidth: 340, numberOfFrames: 29 }
+        this.running=  { cropWidth: 340, cropHeight:400, destWidth: 120,destHeight: 150, numberOfFrames: 29 }
+        this.action = "standing"
+        this.direction = "right"
 
         this.position={ x:100, y: canvas.height - this.standing.destHeight}
         this.velocity={ x:0, y:0}
         this.image= new Image()
-        this.image.src = spriteImages.playerStandRight;
+
+        this.width= this.standing.destWidth
         this.height = this.standing.destHeight
     }
 
     draw(){
-        if (this.frameIndex < this.standing.numberOfFrames - 1) {
+        var numberOfFrames, cropWidth, cropHeight, destWidth,destHeight =0
+        if(this.action == "standing"){
+            this.image.src = this.direction == "right" ? spriteImages.playerStandRight : spriteImages.playerStandLeft;
+            numberOfFrames = this.standing.numberOfFrames
+            cropWidth = this.standing.cropWidth 
+            cropHeight = this.standing.cropHeight
+            destWidth = this.standing.destWidth
+            destHeight = this.standing.destHeight
+        }
+        else if(this.action == "running"){
+            this.image.src = this.direction == "right" ? spriteImages.playerRunRight : spriteImages.playerRunLeft;
+            log(this.direction +" ::" + this.image.src)
+            numberOfFrames = this.running.numberOfFrames
+            cropWidth = this.running.cropWidth 
+            cropHeight = this.running.cropHeight
+            destWidth = this.running.destWidth
+            destHeight = this.running.destHeight
+        }
+
+        if (this.frameIndex < numberOfFrames - 1) {
           this.frameIndex++;
         } else {
-          this.frameIndex = 1;
+          this.frameIndex = 0;
         }
         //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
         c.drawImage(
             this.image,
-            this.frameIndex * this.standing.cropWidth,0,
-            this.standing.cropWidth, this.standing.cropHeight,
-            this.position.x, this.position.y,
-            this.standing.destWidth, this.standing.destHeight
+            this.frameIndex * cropWidth,0,
+            cropWidth, cropHeight, this.position.x, this.position.y,
+            destWidth, destHeight
          );
         
     }
@@ -66,38 +106,52 @@ class Player{
     }
 }
 
-
-const player = new Player()
-const keys ={
-    left:{pressed:false},
-    right:{pressed:false},   
-    up:{pressed:false, jumping : false},   
-
-}
-
 function animate(){
     requestAnimationFrame(animate)
     c.clearRect(0,0, canvas.width, canvas.height)
-    player.update()
-    
-    if(keys.right.pressed)
+
+    if(keys.right.pressed){
+        player.direction ="right"
         player.velocity.x =  5
-    else if(keys.left.pressed)
+    }else if(keys.left.pressed){
+        player.direction ="left"
         player.velocity.x = -5
-    else
+        log(player.direction)
+    }else{
         player.velocity.x =  0
+    }
 
     if(keys.up.pressed)
         player.velocity.y =  -10
     else if(keys.up.jumping)
         player.velocity.y =  10
-    
+
+    player.action = player.velocity.x !==0 ? "running" : "standing"
+
+   platforms.forEach(platform => {
+        //check if player is on platform
+        if(player.position.y + player.height <= platform.position.y
+           && player.position.y + player.height +player.velocity.y >= platform.position.y
+           && player.position.x + player.width >= platform.position.x
+           && player.position.x + player.width < platform.position.x+platform.width){
+           player.velocity.y=0
+       }
+       platform.draw();
+     });
+    player.update()
 }
+
+const player = new Player()
+const platforms = [
+                    new Platform(200, 200, 300, 60, spriteImages.platformBig),
+                    new Platform(500, 300, 300, 60, spriteImages.platformBig),
+                    new Platform(900, 400, 300, 60, spriteImages.platformBig),
+                    new Platform(1020, 100, 150, 100, spriteImages.platformSmall)
+                 ]
 
 animate();
 
 window.addEventListener('keydown', ({key}) =>{
-     
      switch(key){
          case "ArrowLeft": 
             keys.left.pressed= true
@@ -112,14 +166,10 @@ window.addEventListener('keydown', ({key}) =>{
          case "ArrowDown": 
             console.log("Down")
             break
-
      }
-     
-     
 })
 
 window.addEventListener('keyup', ({key}) =>{
-     
      switch(key){
          case "ArrowLeft": 
             keys.left.pressed= false
@@ -134,11 +184,11 @@ window.addEventListener('keyup', ({key}) =>{
          case "ArrowDown": 
             console.log("Down")
             break
-
      }
-     
-     
 })
 
+function log(msg){
+    console.log(msg)
+}
 
 

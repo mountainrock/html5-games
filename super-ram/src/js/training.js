@@ -9,14 +9,15 @@ canvas.height = window.innerHeight
 const gravity = 0.5
 
 const spriteImages = {
-  playerStandRight: "images/spriteStandRight.png",
+
+  playerStandRight: "images/spriteStandRight.png", //spriteStandRight.png
   playerStandLeft: "images/spriteStandLeft.png",
   playerRunRight: "images/spriteRunRight.png",
   playerRunLeft: "images/spriteRunLeft.png",
   platformBig:"images/platform.png",
   platformSmall:"images/platformSmallTall.png",
   background:"images/background.png",
-  backgroundBig:"images/backgroundBig.jpeg"
+  backgroundBig:"images/background.webp" //backgroundBig.jpeg
 };
 
 const keys ={

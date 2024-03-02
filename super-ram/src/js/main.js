@@ -1,232 +1,274 @@
-// Get the canvas element
-const canvas = document.getElementById("gameCanvas");
-const context = canvas.getContext("2d");
+console.log("Game begins")
+
+const canvas = document.querySelector("canvas")
+const c = canvas.getContext('2d')
+canvas.width  = window.innerWidth
+canvas.height  = window.innerHeight
+
+const cWidth = canvas.width, cHeight = canvas.height
+const gravity = 0.5
 
 const spriteImages = {
-  playerStandRight: "images/spriteStandRight.png",
+
+  playerStandRight: "images/spriteStandRight.png", //spriteStandRight.png
   playerStandLeft: "images/spriteStandLeft.png",
   playerRunRight: "images/spriteRunRight.png",
   playerRunLeft: "images/spriteRunLeft.png",
   platformBig:"images/platform.png",
   platformSmall:"images/platformSmallTall.png",
-  background:"images/background.png"
+  background:"images/background.png",
+  backgroundBig:"images/background.webp" //backgroundBig.jpeg
 };
 
-// Set up the player character
-const player = {
-  width: 66,
-  height: 400,
-  destWidth: 60,
-  destHeight: 150,
-  standing: {
-      cropWidth: 177,
-      numberOfFrames: 60
-    },
-    running: {
-      cropWidth: 340,
-      numberOfFrames: 29
-  },
-  x: 50,
-  y: canvas.height - 150,
-  speed: 8,
-  dx: 0,
-  dy: 0,
-  image: new Image(),
-  frameIndex: 0,
-  tickCount: 0,
-  ticksPerFrame: 1,
-  numberOfFrames: 0,
-  isJumping: false,
-  jumpHeight: 10,
-  jumpSpeed: 10,
-  gravity: 0.4
-};
-// Load the player image
-player.image.src = spriteImages.playerStandRight;
+const keys ={
+    left:{pressed:false},
+    right:{pressed:false},
+    up:{pressed:false, jumping : false},
 
-const platform = {
-  x: 200, // X position of the platform
-  y: canvas.height - 200, // Y position of the platform
-  width: 300, // Width of the platform
-  height: 60, // Height of the platform
-  image: new Image(),
-};
+}
 
-platform.image.src = spriteImages.platformBig;
+class Platform{
+    constructor(x1, y1, width1, height1, spriteImage){
+        this.position ={ x:x1, y:canvas.height - y1}
+        this.width = width1
+        this.height= height1
+        this.image= new Image()
+        this.image.src = spriteImage
+    }
 
-const platformSmall = {
-  x: 700, // X position of the platform
-  y: canvas.height - 100, // Y position of the platform
-  width: 150, // Width of the platform
-  height: 100, // Height of the platform
-  image: new Image(),
-};
+    draw(){
+          c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+    }
+}
 
-platformSmall.image.src = spriteImages.platformSmall;
+class Background{
+    constructor(x1, y1, width1, height1, spriteImage){
+        this.position ={ x:x1, y: y1}
+        this.width = width1
+        this.height= height1
+        this.image= new Image()
+        this.image.src = spriteImage
+    }
 
-const backgroundImage = new Image();
-backgroundImage.src = spriteImages.background;
+    draw(){
+          c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+    }
+}
 
-// Set up the game loop
-function gameLoop() {
-    // Clear the canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Update the player position
-    player.x += player.dx;
-    player.y += player.dy;
+class Player{
+    constructor(){
+        this.frameIndex =0
+        this.standing= { cropWidth: 177, cropHeight:400, destWidth: canvasR(cWidth,4),
+                        destHeight:canvasR(cHeight,15), numberOfFrames: 60 }
+        this.running=  { cropWidth: 340, cropHeight:400, destWidth: canvasR(cWidth,8),
+                        destHeight: canvasR(cHeight,15), numberOfFrames: 29 }
+        this.action = "standing"
+        this.direction = "right"
 
-    // Update the platform position based on the player's movement
-    platform.x -= player.dx;
-    platformSmall.x -= player.dx;
+        this.position={ x: canvasR(cWidth,5), y: canvas.height - this.standing.destHeight}
+        this.velocity={ x:0, y:0}
+        this.isJumping = false
+        this.image= new Image()
 
- // Draw the parallax background
-    const backgroundX = -player.x * 0.2; // Adjust the parallax speed as needed
-    context.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
+        this.width= this.standing.destWidth
+        this.height = this.standing.destHeight
+    }
 
-    preventPlayerCanvasMovingOut();
+    draw(){
+        var numberOfFrames, cropWidth, cropHeight, destWidth,destHeight =0
+        if(this.action == "standing"){
+            this.image.src = this.direction == "right" ? spriteImages.playerStandRight : spriteImages.playerStandLeft;
+            numberOfFrames = this.standing.numberOfFrames
+            cropWidth = this.standing.cropWidth 
+            cropHeight = this.standing.cropHeight
+            destWidth = this.standing.destWidth
+            destHeight = this.standing.destHeight
+        }
+        else if(this.action == "running"){
+            this.image.src = this.direction == "right" ? spriteImages.playerRunRight : spriteImages.playerRunLeft;
+            log(this.direction +" ::" + this.image.src)
+            numberOfFrames = this.running.numberOfFrames
+            cropWidth = this.running.cropWidth 
+            cropHeight = this.running.cropHeight
+            destWidth = this.running.destWidth
+            destHeight = this.running.destHeight
+        }
 
-    // Update the player sprite animation
-    player.tickCount++;
-    if (player.tickCount > player.ticksPerFrame) {
-        player.tickCount = 0;
-        player.numberOfFrames = player.dx !== 0  ? player.running.numberOfFrames : player.standing.numberOfFrames;
-
-        if (player.frameIndex < player.numberOfFrames - 1) {
-          player.frameIndex++;
+        if (this.frameIndex < numberOfFrames - 1) {
+          this.frameIndex++;
         } else {
-          player.frameIndex = 0;
+          this.frameIndex = 0;
         }
+        //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+        c.drawImage(
+            this.image,
+            this.frameIndex * cropWidth,0,
+            cropWidth, cropHeight, this.position.x, this.position.y,
+            destWidth, destHeight
+         );
+        
     }
 
-
-    // Apply gravity to the player's vertical movement
-    if (player.isJumping) {
-      player.dy += player.gravity;
-      player.y += player.dy;
-
-      // Check if the player has landed
-      if (player.y + player.destHeight > canvas.height) {
-        player.y = canvas.height - player.destHeight;
-        player.isJumping = false;
-        player.dy = 0; // Reset the vertical velocity when landing
-      }
-
-    }
-    // Draw the player character
-    player.width = player.dx !== 0  ?  player.running.cropWidth : player.standing.cropWidth;
-
-
-    //Debug : Draw the player character bounding box for debugging
-    //context.fillStyle = "lightblue";
-    //context.fillRect(player.x, player.y, player.destWidth, player.destHeight);
-
-    //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-    context.drawImage(
-        player.image,
-        player.frameIndex * player.width,0,
-        player.width, player.height,
-        player.x, player.y,
-        player.destWidth, player.destHeight
-    );
-
-    // Draw the platform
-    context.drawImage(platform.image, platform.x, platform.y, platform.width, platform.height);
-    context.drawImage(platformSmall.image, platformSmall.x, platformSmall.y, platformSmall.width, platformSmall.height);
-
-    // Request the next frame
-    requestAnimationFrame(gameLoop);
-}
-
-function preventPlayerCanvasMovingOut(){
-    // Prevent the player from going out of the canvas vertically
-    if (player.y < 0) {
-      player.y = 0;
-      player.dy = 0;
-    }else if (player.y + player.destHeight > canvas.height) {
-         player.y = canvas.height - player.destHeight;
-         player.dy = 0;
-    }
-
-    // Prevent the player from going out of the canvas horizontally
-    if (player.x < 0) {
-      player.x = 0;
-      player.dx = 0;
-    } else if (player.x + player.destWidth > canvas.width) {
-      player.x = canvas.width - player.destWidth;
-      player.dx = 0;
-    }
-
-    // Apply gravity to the player's vertical movement
-      if (player.isJumping) {
-        player.dy += player.gravity;
-        player.y += player.dy;
-
-        // Check if the player has landed on the platform
-        if (isPlayerOnPlatform()) {
-          player.y = platform.y - player.destHeight;
-          player.isJumping = false;
-          player.dy = 0; // Reset the vertical velocity when landing
-        } else if (player.y + player.destHeight > canvas.height) {
-          player.y = canvas.height - player.destHeight;
-          player.isJumping = false;
-          player.dy = 0; // Reset the vertical velocity when landing
+    update(){
+        
+        this.draw();
+        this.position.x +=this.velocity.x
+        this.position.y +=this.velocity.y
+        if(this.position.y + this.height+ this.velocity.y <= canvas.height){
+            this.velocity.y += gravity
+        }else{
+            this.velocity.y=0
         }
-      }
+
+
+    }
 }
 
-function isPlayerOnPlatform() {
-  return (
-    player.y + player.destHeight >= platform.y &&
-    player.y + player.destHeight <= platform.y + player.dy &&
-    player.x + player.destWidth >= platform.x &&
-    player.x <= platform.x + platform.width
-  );
+/** % Relative size to the canvas to make game responsive
+eg size = 1000, percent =10  will return 10% of size = 100
+*/
+function canvasR(size, percent){
+    return size * percent/100;
 }
 
+function animate(){
+    requestAnimationFrame(animate)
+    c.clearRect(0,0, cWidth, canvas.height)
+    if(keys.right.pressed)
+        player.direction ="right"
+    else if(keys.left.pressed)
+        player.direction ="left"
 
-// Handle keyboard input
-function handleKeyDown(event) {
-  if (event.key === "ArrowLeft") {
-    player.dx = -player.speed;
-    player.image.src = player.dx === 0 ? spriteImages.playerStandLeft : spriteImages.playerRunLeft;
-  } else if (event.key === "ArrowRight") {
-    player.dx = player.speed;
-    player.image.src = player.dx === 0 ? spriteImages.playerStandRight : spriteImages.playerRunRight;
+    if(keys.right.pressed && player.position.x < canvasR(cWidth,40) ){
+        player.velocity.x =  5
+        player.action = "running"
+    }else if(keys.left.pressed && player.position.x >canvasR(cWidth,3)){
+        player.velocity.x =  -5
+        player.action = "running"
+    }else{
+        player.action = "standing"
+        player.velocity.x =  0
 
-  } else if (event.key === "ArrowUp" && !player.isJumping) {
-    player.isJumping = true;
-    player.dy = -player.jumpSpeed;
-  }  else if (event.key === "ArrowDown") {
-    player.dy = player.speed;
-  }
-}
+        if(keys.right.pressed){ //parallax scroll
+                     platforms.forEach(platform => {
+                       platform.position.x -= 5;
+                       player.action = "running"
+                     });
+        }else if(keys.left.pressed){  //parallax scroll
+                     platforms.forEach(platform => {
+                       platform.position.x += 5;
+                       player.action = "running"
+                     });
+         }
+    }
 
-function handleKeyUp(event) {
-  if (event.key === "ArrowLeft") {
-        player.dx = 0;
-        player.image.src = spriteImages.playerStandLeft;
-  } else if (event.key === "ArrowRight") {
-        player.dx = 0;
-        player.image.src = spriteImages.playerStandRight;
-  } else if (event.key === "ArrowUp") {
-       if (player.isJumping) {
-          player.isJumping = false;
-          player.dy = +player.gravity; // Apply gravity to bring the player down
-       }else {
-          log("up pressed " + player.y)
-          player.isJumping = true;
-          player.dy = -player.jumpSpeed; // Set the vertical velocity for jumping
+    if(keys.up.pressed){
+        if(player.velocity.y >=0)
+            player.velocity.y =  -12
+    }else if(player.isJumping){
+        player.velocity.y =  12
+    }
+
+    if(player.velocity.y ==0){
+        player.isJumping = false
+    }
+
+    backgrounds.forEach(background => {
+        background.draw();
+    });
+
+    platforms.forEach(platform => {
+        //check if player is on platform
+        if(player.position.y + player.height <= platform.position.y
+           && player.position.y + player.height +player.velocity.y >= platform.position.y
+           && player.position.x + player.width >= platform.position.x
+           && player.position.x + player.width < platform.position.x+platform.width){
+           player.velocity.y=0
        }
-    }
+       //check if player is below platform
+       if(player.position.y + player.height <= platform.position.y
+                  && player.position.y + player.height +player.velocity.y >= platform.position.y
+                  && player.position.x + player.width >= platform.position.x
+                  && player.position.x + player.width < platform.position.x+platform.width){
+                  player.velocity.y= - player.velocity.y
+              }
+       platform.draw();
+     });
+
+     //prevent player from going out of canvas
+     if(player.position.x < 0 || player.position.x > cWidth-player.width){
+        player.velocity.x=0
+        if( player.position.x > cWidth-player.width)
+            player.position.x= cWidth-player.width
+        if(player.position.x < 0)
+            player.position.x =  0
+     }
+
+    player.update()
 }
+
+const player = new Player()
+const platforms = [
+                    new Platform(x = canvasR(cWidth,15), y = canvasR(cHeight,23), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
+                    new Platform(canvasR(cWidth,40), canvasR(cHeight,30), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
+                    new Platform(canvasR(cWidth,60), canvasR(cHeight,40), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
+                    new Platform(canvasR(cWidth,85), canvasR(cHeight,10), canvasR(cWidth,15), canvasR(canvas.height,10), spriteImages.platformSmall),
+                    new Platform(canvasR(cWidth,110), canvasR(cHeight,10), canvasR(cWidth,15), canvasR(canvas.height,10), spriteImages.platformSmall)
+                 ]
+
+const backgrounds =[
+                        new Background(0,0,cWidth,canvas.height, spriteImages.backgroundBig)
+                   ]
+animate();
+
+function playMusic(){
+     var music = document.getElementById('music')
+     if(music.paused){
+        music.play();
+     }
+}
+window.addEventListener('keydown', function(event){
+     //playMusic();
+
+     key = event.key;
+     switch(key){
+         case "ArrowLeft": 
+            keys.left.pressed= true
+            break
+         case "ArrowRight": 
+            keys.right.pressed= true
+            break
+         case "ArrowUp":
+            keys.up.pressed = true
+            player.isJumping = true
+             break
+         case "ArrowDown": 
+            console.log("Down")
+            break
+     }
+})
+
+window.addEventListener('keyup', ({key}) =>{
+     switch(key){
+         case "ArrowLeft": 
+            keys.left.pressed= false
+            break
+         case "ArrowRight": 
+            keys.right.pressed= false
+            break
+         case "ArrowUp": 
+            keys.up.pressed = false
+            player.isJumping = false
+            break
+         case "ArrowDown": 
+            console.log("Down")
+            break
+     }
+})
 
 function log(msg){
     console.log(msg)
 }
-// Add event listeners for keyboard input
-document.addEventListener("keydown", handleKeyDown);
-document.addEventListener("keyup", handleKeyUp);
 
-log("Start the game loop");
-gameLoop();
+

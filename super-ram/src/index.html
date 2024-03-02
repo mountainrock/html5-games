@@ -1,14 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Website</title>
-
+<style>
+   body {
+    margin:0
+    }
+   canvas {
+      overflow: none;
+   }
+</style>
 </head>
 <body>
-<h1>Super Ram</h1>
-<canvas id="gameCanvas" width="1200" height="600"></canvas>
+<canvas id="game"></canvas>
+
+<audio id="music" loop autoplay style="display:none">
+  <source src="music/background.mp3" type="audio/mp3">
+  Your browser does not support the audio element.
+</audio>
 
 </body>
 
 <script src="js/main.js"></script>
 </html>
+
+<script>
+
+
+window.addEventListener('unload', function() {
+  document.getElementById('music').pause();
+});
+</script>

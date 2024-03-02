@@ -11,10 +11,9 @@
 </style>
 </head>
 <body>
+<canvas id="game"></canvas>
 
-<canvas ></canvas>
-
-<audio id="music" loop autoplay>
+<audio id="music" loop autoplay style="display:none">
   <source src="music/background.mp3" type="audio/mp3">
   Your browser does not support the audio element.
 </audio>
@@ -25,10 +24,7 @@
 </html>
 
 <script>
-// Optional: You can add an event listener to pause the music when the page unloads
-window.addEventListener('load', function() {
-  document.getElementById('music').play();
-});
+
 
 window.addEventListener('unload', function() {
   document.getElementById('music').pause();

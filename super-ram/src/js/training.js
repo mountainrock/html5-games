@@ -2,10 +2,10 @@ console.log("Game begins")
 
 const canvas = document.querySelector("canvas")
 const c = canvas.getContext('2d')
+canvas.width  = window.innerWidth
+canvas.height  = window.innerHeight
 
-canvas.width = window.innerWidth
-canvas.height = window.innerHeight
-
+const cWidth = canvas.width, cHeight = canvas.height
 const gravity = 0.5
 
 const spriteImages = {
@@ -59,13 +59,16 @@ class Background{
 class Player{
     constructor(){
         this.frameIndex =0
-        this.standing= { cropWidth: 177, cropHeight:400, destWidth: 60,  destHeight:150, numberOfFrames: 60 }
-        this.running=  { cropWidth: 340, cropHeight:400, destWidth: 120,destHeight: 150, numberOfFrames: 29 }
+        this.standing= { cropWidth: 177, cropHeight:400, destWidth: canvasR(cWidth,4),
+                        destHeight:canvasR(cHeight,15), numberOfFrames: 60 }
+        this.running=  { cropWidth: 340, cropHeight:400, destWidth: canvasR(cWidth,8),
+                        destHeight: canvasR(cHeight,15), numberOfFrames: 29 }
         this.action = "standing"
         this.direction = "right"
 
-        this.position={ x:100, y: canvas.height - this.standing.destHeight}
+        this.position={ x: canvasR(cWidth,5), y: canvas.height - this.standing.destHeight}
         this.velocity={ x:0, y:0}
+        this.isJumping = false
         this.image= new Image()
 
         this.width= this.standing.destWidth
@@ -122,27 +125,55 @@ class Player{
     }
 }
 
+/** % Relative size to the canvas to make game responsive
+eg size = 1000, percent =10  will return 10% of size = 100
+*/
+function canvasR(size, percent){
+    return size * percent/100;
+}
+
 function animate(){
     requestAnimationFrame(animate)
-    c.clearRect(0,0, canvas.width, canvas.height)
-
-    if(keys.right.pressed){
+    c.clearRect(0,0, cWidth, canvas.height)
+    if(keys.right.pressed)
         player.direction ="right"
-        player.velocity.x =  5
-    }else if(keys.left.pressed){
+    else if(keys.left.pressed)
         player.direction ="left"
-        player.velocity.x = -5
-        log(player.direction)
+
+    if(keys.right.pressed && player.position.x < canvasR(cWidth,40) ){
+        player.velocity.x =  5
+        player.action = "running"
+    }else if(keys.left.pressed && player.position.x >canvasR(cWidth,3)){
+        player.velocity.x =  -5
+        player.action = "running"
     }else{
+        player.action = "standing"
         player.velocity.x =  0
+
+        if(keys.right.pressed){ //parallax scroll
+                     platforms.forEach(platform => {
+                       platform.position.x -= 5;
+                       player.action = "running"
+                     });
+        }else if(keys.left.pressed){  //parallax scroll
+                     platforms.forEach(platform => {
+                       platform.position.x += 5;
+                       player.action = "running"
+                     });
+         }
     }
 
-    if(keys.up.pressed)
-        player.velocity.y =  -10
-    else if(keys.up.jumping)
-        player.velocity.y =  10
+    if(keys.up.pressed){
+        if(player.velocity.y >=0)
+            player.velocity.y =  -12
+    }else if(player.isJumping){
+        player.velocity.y =  12
+    }
 
-    player.action = player.velocity.x !==0 ? "running" : "standing"
+    if(player.velocity.y ==0){
+        player.isJumping = false
+    }
+
     backgrounds.forEach(background => {
         background.draw();
     });
@@ -155,14 +186,21 @@ function animate(){
            && player.position.x + player.width < platform.position.x+platform.width){
            player.velocity.y=0
        }
+       //check if player is below platform
+       if(player.position.y + player.height <= platform.position.y
+                  && player.position.y + player.height +player.velocity.y >= platform.position.y
+                  && player.position.x + player.width >= platform.position.x
+                  && player.position.x + player.width < platform.position.x+platform.width){
+                  player.velocity.y= - player.velocity.y
+              }
        platform.draw();
      });
 
      //prevent player from going out of canvas
-     if(player.position.x < 0 || player.position.x > canvas.width-player.width){
+     if(player.position.x < 0 || player.position.x > cWidth-player.width){
         player.velocity.x=0
-        if( player.position.x > canvas.width-player.width)
-            player.position.x= canvas.width-player.width
+        if( player.position.x > cWidth-player.width)
+            player.position.x= cWidth-player.width
         if(player.position.x < 0)
             player.position.x =  0
      }
@@ -172,18 +210,28 @@ function animate(){
 
 const player = new Player()
 const platforms = [
-                    new Platform(200, 200, 300, 60, spriteImages.platformBig),
-                    new Platform(500, 300, 300, 60, spriteImages.platformBig),
-                    new Platform(900, 400, 300, 60, spriteImages.platformBig),
-                    new Platform(1020, 100, 150, 100, spriteImages.platformSmall)
+                    new Platform(x = canvasR(cWidth,15), y = canvasR(cHeight,23), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
+                    new Platform(canvasR(cWidth,40), canvasR(cHeight,30), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
+                    new Platform(canvasR(cWidth,60), canvasR(cHeight,40), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
+                    new Platform(canvasR(cWidth,85), canvasR(cHeight,10), canvasR(cWidth,15), canvasR(canvas.height,10), spriteImages.platformSmall),
+                    new Platform(canvasR(cWidth,110), canvasR(cHeight,10), canvasR(cWidth,15), canvasR(canvas.height,10), spriteImages.platformSmall)
                  ]
 
 const backgrounds =[
-                        new Background(0,0,canvas.width-10,canvas.height-10, spriteImages.backgroundBig)
+                        new Background(0,0,cWidth,canvas.height, spriteImages.backgroundBig)
                    ]
 animate();
 
-window.addEventListener('keydown', ({key}) =>{
+function playMusic(){
+     var music = document.getElementById('music')
+     if(music.paused){
+        music.play();
+     }
+}
+window.addEventListener('keydown', function(event){
+     //playMusic();
+
+     key = event.key;
      switch(key){
          case "ArrowLeft": 
             keys.left.pressed= true
@@ -191,10 +239,10 @@ window.addEventListener('keydown', ({key}) =>{
          case "ArrowRight": 
             keys.right.pressed= true
             break
-         case "ArrowUp": 
+         case "ArrowUp":
             keys.up.pressed = true
-            keys.up.jumping = true
-            break
+            player.isJumping = true
+             break
          case "ArrowDown": 
             console.log("Down")
             break
@@ -211,7 +259,7 @@ window.addEventListener('keyup', ({key}) =>{
             break
          case "ArrowUp": 
             keys.up.pressed = false
-            keys.up.jumping = false
+            player.isJumping = false
             break
          case "ArrowDown": 
             console.log("Down")

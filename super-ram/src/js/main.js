@@ -125,12 +125,6 @@ class Player{
     }
 }
 
-/** % Relative size to the canvas to make game responsive
-eg size = 1000, percent =10  will return 10% of size = 100
-*/
-function canvasR(size, percent){
-    return size * percent/100;
-}
 
 function animate(){
     requestAnimationFrame(animate)
@@ -222,12 +216,7 @@ const backgrounds =[
                    ]
 animate();
 
-function playMusic(){
-     var music = document.getElementById('music')
-     if(music.paused){
-        music.play();
-     }
-}
+
 window.addEventListener('keydown', function(event){
      //playMusic();
 
@@ -267,8 +256,5 @@ window.addEventListener('keyup', ({key}) =>{
      }
 })
 
-function log(msg){
-    console.log(msg)
-}
 
 

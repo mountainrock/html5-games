@@ -1,3 +1,5 @@
+
+const PLAYER_VELOCITY=3;
 /** % Relative size to the canvas to make game responsive
 eg size = 1000, percent =10  will return 10% of size = 100
 */

@@ -59,10 +59,10 @@ class Background{
 class Player{
     constructor(){
         this.frameIndex =0
-        this.standing= { cropWidth: 177, cropHeight:400, destWidth: canvasR(cWidth,4),
-                        destHeight:canvasR(cHeight,15), numberOfFrames: 60 }
-        this.running=  { cropWidth: 340, cropHeight:400, destWidth: canvasR(cWidth,8),
-                        destHeight: canvasR(cHeight,15), numberOfFrames: 29 }
+        this.standing= { cropWidth: 200, cropHeight:350, destWidth: canvasR(cWidth,5),
+                        destHeight:canvasR(cHeight,20), numberOfFrames: 60 }
+        this.running=  { cropWidth: 220, cropHeight:350, destWidth: canvasR(cWidth,6),
+                        destHeight: canvasR(cHeight,20), numberOfFrames: 60 }
         this.action = "standing"
         this.direction = "right"
 
@@ -135,10 +135,10 @@ function animate(){
         player.direction ="left"
 
     if(keys.right.pressed && player.position.x < canvasR(cWidth,40) ){
-        player.velocity.x =  5
+        player.velocity.x =  PLAYER_VELOCITY;
         player.action = "running"
     }else if(keys.left.pressed && player.position.x >canvasR(cWidth,3)){
-        player.velocity.x =  -5
+        player.velocity.x =  -PLAYER_VELOCITY
         player.action = "running"
     }else{
         player.action = "standing"
@@ -146,12 +146,12 @@ function animate(){
 
         if(keys.right.pressed){ //parallax scroll
                      platforms.forEach(platform => {
-                       platform.position.x -= 5;
+                       platform.position.x -= PLAYER_VELOCITY;
                        player.action = "running"
                      });
         }else if(keys.left.pressed){  //parallax scroll
                      platforms.forEach(platform => {
-                       platform.position.x += 5;
+                       platform.position.x += PLAYER_VELOCITY;
                        player.action = "running"
                      });
          }

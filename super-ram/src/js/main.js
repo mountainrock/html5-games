@@ -1,7 +1,7 @@
 console.log("Game begins")
 
 const canvas = document.querySelector("canvas")
-const c = canvas.getContext('2d')
+const ctx = canvas.getContext('2d')
 canvas.width  = window.innerWidth
 canvas.height  = window.innerHeight
 
@@ -42,7 +42,7 @@ class Platform{
     }
 
     draw(){
-          c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+          ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
     }
 }
 
@@ -56,7 +56,7 @@ class Background{
     }
 
     draw(){
-          c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
+          ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
     }
 }
 
@@ -71,8 +71,8 @@ class Enemy{
         this.action = "standing"
         this.direction = "right"
 
-        this.position={ x: canvasR(cWidth,50), y: canvas.height - this.standing.destHeight}
-        this.velocity={ x:0, y:0}
+        this.position={ x: canvasR(cWidth,90), y: canvas.height - this.standing.destHeight}
+        this.velocity={ x: ENEMY_VELOCITY, y:0}
         this.isJumping = false
         this.image= new Image()
 
@@ -92,7 +92,7 @@ class Enemy{
         }
         else if(this.action == "running"){
             this.image.src = this.direction == "right" ? spriteImages.enemyRunRight : spriteImages.enemyRunLeft;
-            log(this.direction +" ::" + this.image.src)
+            log(this.direction )
             numberOfFrames = this.running.numberOfFrames
             cropWidth = this.running.cropWidth
             cropHeight = this.running.cropHeight
@@ -106,7 +106,7 @@ class Enemy{
           this.frameIndex = 0;
         }
         //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-        c.drawImage(
+        ctx.drawImage(
             this.image,
             this.frameIndex * cropWidth,0,
             cropWidth, cropHeight, this.position.x, this.position.y,
@@ -147,6 +147,7 @@ class Player{
 
         this.width= this.standing.destWidth
         this.height = this.standing.destHeight
+        this.health =100
     }
 
     draw(){
@@ -161,7 +162,7 @@ class Player{
         }
         else if(this.action == "running"){
             this.image.src = this.direction == "right" ? spriteImages.playerRunRight : spriteImages.playerRunLeft;
-            log(this.direction +" ::" + this.image.src)
+            log(this.direction)
             numberOfFrames = this.running.numberOfFrames
             cropWidth = this.running.cropWidth 
             cropHeight = this.running.cropHeight
@@ -175,7 +176,7 @@ class Player{
           this.frameIndex = 0;
         }
         //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-        c.drawImage(
+        ctx.drawImage(
             this.image,
             this.frameIndex * cropWidth,0,
             cropWidth, cropHeight, this.position.x, this.position.y,
@@ -195,6 +196,8 @@ class Player{
             this.velocity.y=0
         }
 
+        drawTextBG("SCORE : "+ score, 22, canvasR(cWidth,80), canvasR(cHeight,10));
+        drawTextBG("HEALTH : "+ this.health, 22, canvasR(cWidth,60), canvasR(cHeight,10));
 
     }
 }
@@ -202,7 +205,7 @@ class Player{
 
 function animate(){
     requestAnimationFrame(animate)
-    c.clearRect(0,0, cWidth, canvas.height)
+    ctx.clearRect(0,0, cWidth, canvas.height)
     if(keys.right.pressed)
         player.direction ="right"
     else if(keys.left.pressed)
@@ -274,6 +277,12 @@ function animate(){
         if(player.position.x < 0)
             player.position.x =  0
      }
+
+     //check if enemy collides
+    if(player.position.x > enemy.position.x ){
+        drawTextBG("GAME ENDS  ", 40, canvasR(cWidth,40), canvasR(cHeight,40));
+        enemy.velocity.x =0
+    }
 
     player.update()
     enemy.update()

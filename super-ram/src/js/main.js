@@ -7,17 +7,22 @@ canvas.height  = window.innerHeight
 
 const cWidth = canvas.width, cHeight = canvas.height
 const gravity = 0.5
+var isGameMusicOn = false
 
 const spriteImages = {
+    playerStandRight: "images/spriteStandRight.png", //spriteStandRight.png
+    playerStandLeft: "images/spriteStandLeft.png",
+    playerRunRight: "images/spriteRunRight.png",
+    playerRunLeft: "images/spriteRunLeft.png",
+    platformBig:"images/platform.png",
+    platformSmall:"images/platformSmallTall.png",
+    background:"images/background.png",
+    backgroundBig:"images/background.webp", //backgroundBig.jpeg
 
-  playerStandRight: "images/spriteStandRight.png", //spriteStandRight.png
-  playerStandLeft: "images/spriteStandLeft.png",
-  playerRunRight: "images/spriteRunRight.png",
-  playerRunLeft: "images/spriteRunLeft.png",
-  platformBig:"images/platform.png",
-  platformSmall:"images/platformSmallTall.png",
-  background:"images/background.png",
-  backgroundBig:"images/background.webp" //backgroundBig.jpeg
+    enemyStandRight: "images/enemy/enemy-spriteRunLeft.png", //spriteStandRight.png
+    enemyStandLeft: "images/enemy/enemy-spriteRunLeft.png",
+    enemyRunRight: "images/enemy/enemy-spriteStandLeft.png",
+    enemyRunLeft: "images/enemy/enemy-spriteRunLeft.png",
 };
 
 const keys ={
@@ -55,6 +60,75 @@ class Background{
     }
 }
 
+
+class Enemy{
+    constructor(){
+        this.frameIndex =0
+        this.standing= { cropWidth: 340, cropHeight:400, destWidth: canvasR(cWidth,6),
+                        destHeight:canvasR(cHeight,40), numberOfFrames: 29 }
+        this.running=  { cropWidth: 340, cropHeight:400, destWidth: canvasR(cWidth,8),
+                        destHeight: canvasR(cHeight,45), numberOfFrames: 60 }
+        this.action = "standing"
+        this.direction = "right"
+
+        this.position={ x: canvasR(cWidth,50), y: canvas.height - this.standing.destHeight}
+        this.velocity={ x:0, y:0}
+        this.isJumping = false
+        this.image= new Image()
+
+        this.width= this.standing.destWidth
+        this.height = this.standing.destHeight
+    }
+
+    draw(){
+        var numberOfFrames, cropWidth, cropHeight, destWidth,destHeight =0
+        if(this.action == "standing"){
+            this.image.src = this.direction == "right" ? spriteImages.enemyStandRight : spriteImages.enemyStandLeft;
+            numberOfFrames = this.standing.numberOfFrames
+            cropWidth = this.standing.cropWidth
+            cropHeight = this.standing.cropHeight
+            destWidth = this.standing.destWidth
+            destHeight = this.standing.destHeight
+        }
+        else if(this.action == "running"){
+            this.image.src = this.direction == "right" ? spriteImages.enemyRunRight : spriteImages.enemyRunLeft;
+            log(this.direction +" ::" + this.image.src)
+            numberOfFrames = this.running.numberOfFrames
+            cropWidth = this.running.cropWidth
+            cropHeight = this.running.cropHeight
+            destWidth = this.running.destWidth
+            destHeight = this.running.destHeight
+        }
+
+        if (this.frameIndex < numberOfFrames - 1) {
+          this.frameIndex++;
+        } else {
+          this.frameIndex = 0;
+        }
+        //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+        c.drawImage(
+            this.image,
+            this.frameIndex * cropWidth,0,
+            cropWidth, cropHeight, this.position.x, this.position.y,
+            destWidth, destHeight
+         );
+
+    }
+
+    update(){
+
+        this.draw();
+        this.position.x +=this.velocity.x
+        this.position.y +=this.velocity.y
+        if(this.position.y + this.height+ this.velocity.y <= canvas.height){
+            this.velocity.y += gravity
+        }else{
+            this.velocity.y=0
+        }
+
+
+    }
+}
 
 class Player{
     constructor(){
@@ -166,6 +240,7 @@ function animate(){
 
     if(player.velocity.y ==0){
         player.isJumping = false
+
     }
 
     backgrounds.forEach(background => {
@@ -179,6 +254,7 @@ function animate(){
            && player.position.x + player.width >= platform.position.x
            && player.position.x + player.width < platform.position.x+platform.width){
            player.velocity.y=0
+
        }
        //check if player is below platform
        if(player.position.y + player.height <= platform.position.y
@@ -200,9 +276,11 @@ function animate(){
      }
 
     player.update()
+    enemy.update()
 }
 
 const player = new Player()
+const enemy = new Enemy()
 const platforms = [
                     new Platform(x = canvasR(cWidth,15), y = canvasR(cHeight,23), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
                     new Platform(canvasR(cWidth,40), canvasR(cHeight,30), canvasR(cWidth,20), canvasR(canvas.height,8), spriteImages.platformBig),
@@ -218,7 +296,10 @@ animate();
 
 
 window.addEventListener('keydown', function(event){
-     //playMusic();
+    if(isGameMusicOn ==false){
+     playTheme("ramayana-theme");
+     isGameMusicOn = true;
+    }
 
      key = event.key;
      switch(key){
@@ -229,6 +310,7 @@ window.addEventListener('keydown', function(event){
             keys.right.pressed= true
             break
          case "ArrowUp":
+            playMusic("Jump Super");
             keys.up.pressed = true
             player.isJumping = true
              break

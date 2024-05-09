@@ -7,13 +7,27 @@ function canvasR(size, percent){
     return size * percent/100;
 }
 
-function playMusic(){
+function playMusic(src){
      var music = document.getElementById('music')
+     music.loop=false
+     music.src = "Sounds/Sounds/mp3/"+src +".mp3"
      if(music.paused){
         music.play();
      }
 }
-
+function pauseMusic(src){
+ if(music.paused == false){
+        music.play();
+     }
+}
+function playTheme(src){
+     var theme = document.getElementById('theme')
+     theme.loop=true
+     theme.src = "Sounds/Themes/mp3/"+src +".mp3"
+     if(theme.paused){
+        theme.play();
+     }
+}
 
 function log(msg){
     console.log(msg)

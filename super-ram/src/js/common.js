@@ -1,5 +1,5 @@
 
-const PLAYER_VELOCITY=3;
+const PLAYER_VELOCITY=4;
 const ENEMY_VELOCITY = -1;
 const DEBUG_CANVAS = true;
 
@@ -45,7 +45,7 @@ function log(msg){
 function drawTextBG(txt, fontSize, x, y) {
     ctx.save();     /// lets save current state as we make a lot of changes
     ctx.font = fontSize.toString() + "px monospace";
-    ctx.globalCompositeOperation = 'xor';
+    //ctx.globalCompositeOperation = 'xor';
     ctx.textBaseline = 'top';
     ctx.fillStyle = '#f50';     /// color for background
     var width = ctx.measureText(txt).width;

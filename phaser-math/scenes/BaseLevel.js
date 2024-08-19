@@ -56,22 +56,30 @@ export default class BaseLevel extends Phaser.Scene {
 
     createMonster() {
         const boundary = this.physics.add.staticGroup();
-        boundary.create(this.scale.width / 2 - 200, this.scale.height / 2 - 100, 'dummy').setScale(1, 1).refreshBody();
+        boundary.create(this.scale.width / 2 - 300, this.scale.height - 100, 'dummy').setScale(1, 1).refreshBody();
 
-        const monster = this.physics.add.sprite(400, 300, 'monster' + this.level);
+        const boundaryRight = this.physics.add.staticGroup();
+        boundaryRight.create(this.scale.width  - 100, this.scale.height - 100, 'dummyRight').setScale(1, 1).refreshBody();
+
+        const monster = this.physics.add.sprite(800, 300, 'monster' + this.level);
         monster.setScale(0.4);
-        monster.setBounce(1);
+        //monster.setBounce(1);
+        monster.setVelocityX(-100);
         monster.setCollideWorldBounds(true);
 
-        monster.setVelocity(Phaser.Math.Between(-200, 200), Phaser.Math.Between(-200, 200));
-        monster.setMaxVelocity(300);
-
+       
         this.monsterLaughSound = this.sound.add('monsterLaugh');
         this.monsterLaughSound.play();
 
         monster.setInteractive();
         this.physics.add.collider(monster, boundary, () => {
              this.monsterLaughSound.play();
+             monster.setVelocityX(100);
+
+        });
+        this.physics.add.collider(monster, boundaryRight, () => {
+             monster.setVelocityX(-100);
+
         });
     }
 
@@ -140,7 +148,6 @@ export default class BaseLevel extends Phaser.Scene {
     }
 
     levelComplete() {
-        // Stop the theme sound
         this.themeSound.stop();
         this.monsterLaughSound.stop();
 

@@ -7,3 +7,8 @@ TODO:
 
 Done:
 1. Create BaseScene and add common theme and laugh sounds in one place
+
+
+Adding a new level
+1. Create LevelN.js (refer Level1.js)
+2. Update game.js to import this file with LevelN.js and add to gameConfig.scene

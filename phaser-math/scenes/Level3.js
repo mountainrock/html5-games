@@ -27,8 +27,8 @@ export default class Level3 extends Phaser.Scene {
 
 
     create() {
-            this.themeSound = this.sound.add('theme'); 
-            this.sound.play('theme', { volume: 0.5 });
+            this.themeSound = this.sound.add('theme', { volume: 0.5, loop: true });
+            this.themeSound.play();
             this.add.image(0,0, 'backgroundlevel'+this.level).setOrigin(0, 0).setDisplaySize(gameConfig.width, gameConfig.height);
 
             const scoreBackground = this.add.graphics();
@@ -137,6 +137,6 @@ export default class Level3 extends Phaser.Scene {
 
     levelComplete() {
          this.themeSound.stop()
-        this.scene.start('Level3');
+        this.scene.start('MainMenu');
     }
 }

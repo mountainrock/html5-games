@@ -6,7 +6,6 @@ export default class MainMenu extends Phaser.Scene {
 
     preload() {
         this.load.image('background', 'images/menu.png'); // Background image
-        this.load.image('playButton', 'images/level1-button.png'); // Play button image
     }
 
     create() {

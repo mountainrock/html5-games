@@ -16,7 +16,7 @@ export default class BaseLevel extends Phaser.Scene {
         this.levelCompleteScore = 50;
         this.themeSound = this.shootSound = this.monsterLaughSound = null;
         this.maxLevel = 4;
-        this.menuFontColor = '#5f6c7a';
+        this.menuFontColor = '#d9d6d6';
         
     }
 
@@ -38,8 +38,9 @@ export default class BaseLevel extends Phaser.Scene {
         this.load.image('arrow', 'images/arrow.png');
         this.load.image('cup', 'images/cup.png');
 
-        const widthScaleFactor = this.scale.width / 800;
-        this.menuFontSize = Math.round(26 * widthScaleFactor);
+        this.widthScaleFactor = this.scale.width / 800;
+        this.heightScaleFactor = this.scale.height / 600; 
+        this.menuFontSize = Math.round(22 * this.widthScaleFactor);
     }
 
     create() {
@@ -57,68 +58,62 @@ export default class BaseLevel extends Phaser.Scene {
         this.input.keyboard.on('keydown', this.handleInput, this);
     }
 
+
     createScoreBoard() {
-        // Calculate scale factors based on screen width and height
-        const widthScaleFactor = this.scale.width / 800;  // Assuming 800 as a base width for scaling
-        const heightScaleFactor = this.scale.height / 600;  // Assuming 600 as a base height for scaling
-
+     
         // Responsive font sizes based on the screen size
-
         const scoreFontSize = this.menuFontSize;  // Scale font size based on screen width
-        const questionFontSize = Math.round(48 * widthScaleFactor);
+        const questionFontSize = Math.round(48 * this.widthScaleFactor);
         const scoreFontColor = this.menuFontColor; 
 
         // Score background
         const scoreBackground = this.add.graphics();
-        scoreBackground.fillStyle(0xffffff, 0.5);
-        scoreBackground.fillRect(0, 0, this.scale.width, Math.round(75 * heightScaleFactor));  // Adjust height based on scale
+        scoreBackground.fillStyle(0xffffff, 0.3);
+        scoreBackground.fillRect(0, 0, this.scale.width, Math.round(75 * this.heightScaleFactor));  // Adjust height based on scale
 
         // Score and level text
-        this.scoreText = this.add.text(16 * widthScaleFactor, 16 * heightScaleFactor, 'Score 0', { fontSize: `${scoreFontSize}px`, fill: scoreFontColor });
-        this.levelText = this.add.text(200 * widthScaleFactor, 16 * heightScaleFactor, `Level ${this.level}`, { fontSize: `${scoreFontSize}px`, fill: scoreFontColor });
+        this.scoreText = this.add.text(16 * this.widthScaleFactor, 20 * this.heightScaleFactor, 'Score 0', { fontSize: `${scoreFontSize}px`, fill: scoreFontColor });
+        this.levelText = this.add.text(200 * this.widthScaleFactor, 20 * this.heightScaleFactor, `Level ${this.level}`, { fontSize: `${scoreFontSize}px`, fill: scoreFontColor });
 
         // Question background
         const questionBackground = this.add.graphics();
-        const questionBgWidth = 280 * widthScaleFactor;
-        const questionBgHeight = 300 * heightScaleFactor;
-        questionBackground.fillStyle(0xffffff, 0.5);
+        const questionBgWidth = 280 * this.widthScaleFactor;
+        const questionBgHeight = 300 * this.heightScaleFactor;
+        questionBackground.fillStyle(0xffffff, 0.3);
         questionBackground.fillRect(this.scale.width / 2 - questionBgWidth / 2, this.scale.height / 2 -50, questionBgWidth, questionBgHeight);
 
         // Question and input text
         this.questionText = this.add.text(
-            this.scale.width / 2 - (100 * widthScaleFactor),
+            this.scale.width / 2 - (100 * this.widthScaleFactor),
             this.scale.height / 2 -50,
             'Question',
             { fontSize: `${questionFontSize}px`, fill: '#000' }
         );
         this.inputText = this.add.text(
-            this.scale.width / 2 - (70 * widthScaleFactor),
-            this.scale.height / 2 + (130 * heightScaleFactor),
+            this.scale.width / 2 - (80 * this.widthScaleFactor),
+            this.scale.height / 2 + (130 * this.heightScaleFactor),
             '',
             { fontSize: `${questionFontSize}px`, fill: '#000' }
         );
     }
 
 createMonster() {
-    // Calculate scale factors based on screen width and height
-    const widthScaleFactor = this.scale.width / 800;  // Assuming 800 as a base width for scaling
-    const heightScaleFactor = this.scale.height / 600;  // Assuming 600 as a base height for scaling
-
+    
     // Responsive positions for the kid and monster
-    const kidX = this.scale.width / 2 - 350 * widthScaleFactor;  // Adjust position based on scale
-    const kidY = this.scale.height - 100 * heightScaleFactor;    // Adjust position based on scale
-    const monsterX = this.scale.width - 50 * widthScaleFactor;   // Place monster near the right edge
-    const monsterY = 200 * heightScaleFactor; // Initial monster position based on screen height
+    const kidX = this.scale.width / 2 - 350 * this.widthScaleFactor;  // Adjust position based on scale
+    const kidY = this.scale.height - 100 * this.heightScaleFactor;    // Adjust position based on scale
+    const monsterX = this.scale.width - 70 * this.widthScaleFactor;   // Place monster near the right edge
+    const monsterY = 200 * this.heightScaleFactor; // Initial monster position based on screen height
 
     // Kid sprite
     this.kid = this.physics.add.staticSprite(kidX, kidY, 'kid');
-    this.kid.setScale(0.6 * Math.min(widthScaleFactor, heightScaleFactor));  // Adjust scale based on screen size
+    this.kid.setScale(0.6 * Math.min(this.widthScaleFactor, this.heightScaleFactor));  // Adjust scale based on screen size
     this.kid.setSize(this.kid.width * 0.7, this.kid.height * 0.7);
 
     // Monster sprite
     this.monster = this.physics.add.sprite(monsterX, monsterY, 'monster' + this.level);
     this.monsterCount = this.level + 1;
-    this.monster.setScale(0.4 * Math.min(widthScaleFactor, heightScaleFactor));  // Adjust scale based on screen size
+    this.monster.setScale(0.4 * Math.min(this.widthScaleFactor, this.heightScaleFactor));  // Adjust scale based on screen size
 
     // Ensure the monster is active and dynamic
     this.monster.setCollideWorldBounds(true);
@@ -167,7 +162,7 @@ createMonster() {
     }
 
     createBackButton() {
-        const backButton = this.add.text(this.scale.width - 100, 20, 'Back', { fontSize: this.menuFontSize, fill: this.menuFontColor })
+        const backButton = this.add.text(this.scale.width - 100, 20 * this.heightScaleFactor, 'Back', { fontSize: this.menuFontSize, fill: this.menuFontColor })
             .setInteractive()
             .on('pointerover', () => backButton.setStyle({ fill: '#baced0' }))
             .on('pointerout', () => backButton.setStyle({ fill: '#000' }))
@@ -177,7 +172,7 @@ createMonster() {
                 this.scene.start('MainMenu');
             });
         
-        const pauseButton = this.add.text(this.scale.width - 300, 20, 'Pause', { fontSize: this.menuFontSize, fill: this.menuFontColor })
+        const pauseButton = this.add.text(this.scale.width - 300, 20 * this.heightScaleFactor, 'Pause', { fontSize: this.menuFontSize, fill: this.menuFontColor })
             .setInteractive()
             .on('pointerdown', () => this.togglePause());
 

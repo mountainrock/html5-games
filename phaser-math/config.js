@@ -1,12 +1,16 @@
 // config.js
 export const gameConfig = {
     type: Phaser.AUTO,
-    width: 900,
-    height: 700,
+    width: window.innerWidth,  // Set width based on the window
+    height: window.innerHeight,  // Set height based on the window
+    scale: {
+        mode: Phaser.Scale.FIT,  // Scale the game to fit the screen
+        autoCenter: Phaser.Scale.CENTER_BOTH,  // Center the game
+    },
     physics: {
         default: 'arcade',
         arcade: {
-            debug: false,
+            debug: true,
             gravity: { y: 100 }
         }
     },

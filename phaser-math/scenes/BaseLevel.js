@@ -140,11 +140,11 @@ createMonster() {
     // Function to shoot an arrow
     shootArrow() {
          const arrow = this.arrows.create(this.kid.x, this.kid.y, 'arrow');
-        arrow.setScale(0.7);  // Adjust arrow size if needed
+        arrow.setScale(0.5);  // Adjust arrow size if needed
         arrow.setOrigin(0.5, 0.5);  // Set the origin to the center
 
         // Calculate direction and set velocity
-        const direction = new Phaser.Math.Vector2(this.monster.x - this.kid.x, this.monster.y - this.kid.y-15).normalize();
+        const direction = new Phaser.Math.Vector2(this.monster.x - this.kid.x, this.monster.y - this.kid.y-100).normalize();
         const speed = 500;  // Adjust speed as needed
         arrow.setVelocity(direction.x * speed, direction.y * speed);
 
@@ -289,7 +289,7 @@ generateQuestion() {
         // Reset monster to the starting position and velocity
         this.monster.destroy()
         this.monster = this.physics.add.sprite(800, 200, 'monster' + this.monsterCount);
-        this.monsterCount++;
+        this.monsterCount = this.monsterCount > 4 ? 0 : this.monsterCount++;
         this.monster.setScale(0.4);
         this.monster.setPosition(800, 200); // Set the initial position
         this.monster.setVelocityX(-20);     // Reset the initial velocity
@@ -308,7 +308,8 @@ generateQuestion() {
     }
 
     levelUp() {
-        if (this.score == this.levelCompleteScore) {
+        console.log("Score : "+this.score);
+        if (this.score >= this.levelCompleteScore) {
             this.levelComplete();
         } else {
             this.levelText.setText(`Level: ${this.level}`);

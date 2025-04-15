@@ -52,7 +52,7 @@ export default class MainMenu extends Phaser.Scene {
 
         // Responsive instructions text
         const instructionsFontSize = Math.min(this.scale.width / 36, 22); // Adjust font size based on screen width
-        this.scene.start(`Level1`);
+        //this.scene.start(`Level1`);
     }
 
 
